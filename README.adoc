@@ -1,0 +1,47 @@
+= Reproducer for Micronaut / Jackson / Native Image issue
+
+The problem does not appear when running via the JVM:
+
+. Compile:
++
+[source]
+----
+ ./mvnw package
+----
+
+. Run:
++
+[source]
+----
+java -jar target/jackson-native-image-issue-0.1.jar get-repo-info --owner=wimdeblauwe --repo=blog-example-code
+----
+
+This should work without problems.
+
+Now when running via native-image:
+
+. Use GraalVM SDK:
++
+[source]
+----
+sdk use java 21.2.0.r11-grl
+----
+. Compile:
++
+[source]
+----
+ ./mvnw package -Dpackaging=native-image
+----
+. Run:
+[source]
+----
+./target/jackson-native-image-issue get-repo-info --owner=wimdeblauwe --repo=blog-example-code
+----
+
+The result is now an exception:
+
+[source]
+----
+com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Cannot construct instance of `com.wimdeblauwe.examples.RepositoryInfo` (no Creators, like default constructor, exist): cannot deserialize from Object value (no delegate- or property-based Creator)
+ at [Source: (String)"{"id":217848577,"node_id":"MDEwOlJlcG9zaXRvcnkyMTc4NDg1Nzc=","name":"blog-example-code","full_name":"wimdeblauwe/blog-example-code","private":false,"owner":{"login":"wimdeblauwe","id":1115823,"node_id":"MDQ6VXNlcjExMTU4MjM=","avatar_url":"https://avatars.githubusercontent.com/u/1115823?v=4","gravatar_id":"","url":"https://api.github.com/users/wimdeblauwe","html_url":"https://github.com/wimdeblauwe","followers_url":"https://api.github.com/users/wimdeblauwe/followers","following_url":"https://api."[truncated 4937 chars]; line: 1, column: 2]
+----
